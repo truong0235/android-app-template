@@ -28,6 +28,13 @@ jobs:
           git checkout -b test origin/test 2>/dev/null || git checkout --orphan test
 
           TMP_DIR=$(mktemp -d)
+
+          echo "android create --list"
+          android create --list
+
+          echo "android create list"
+          android create list
+
           android create --output="$TMP_DIR" --name=MyApp
 
           cp -r "$TMP_DIR/." .
