@@ -24,16 +24,20 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-          git switch test || git checkout --orphan test
-          git pull origin test;
-          git rm -rf . 2>/dev/null || true
+          git fetch origin test 2>/dev/null || true
+          git checkout -b test origin/test 2>/dev/null || git checkout --orphan test
 
           TMP_DIR=$(mktemp -d)
-          android create --list
           android create --output="$TMP_DIR" --name=MyApp
-          cp -r "$TMP_DIR/." .
-          rm -rf "$TMP_DIR"
 
-          git add .
-          git commit -m "Generate Android project from template"
-          git push origin test
+          if ! diff -rq "$TMP_DIR" . --exclude=.git 2>/dev/null; then
+            git rm -rf . 2>/dev/null || true
+            cp -r "$TMP_DIR/." .
+            rm -rf "$TMP_DIR"
+
+            git add .
+            git commit -m "Generate Android project from template"
+            git push origin test
+          else
+            echo "No changes — skipping push"
+          fi
