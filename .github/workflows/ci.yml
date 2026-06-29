@@ -27,22 +27,16 @@ jobs:
           git fetch origin test 2>/dev/null || true
           git checkout -b test origin/test 2>/dev/null || git checkout --orphan test
 
-          echo "List all template"
-          android create --list
-          echo "\n"
-          echo "\n"
-
           TMP_DIR=$(mktemp -d)
           android create --output="$TMP_DIR" --name=MyApp
 
-          if ! diff -rq "$TMP_DIR" . --exclude=.git 2>/dev/null; then
-            git rm -rf . 2>/dev/null || true
-            cp -r "$TMP_DIR/." .
-            rm -rf "$TMP_DIR"
+          cp -r "$TMP_DIR/." .
+          rm -rf "$TMP_DIR"
 
-            git add .
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes — skipping push"
+          else
             git commit -m "Generate Android project from template"
             git push origin test
-          else
-            echo "No changes — skipping push"
           fi
