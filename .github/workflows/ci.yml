@@ -25,7 +25,10 @@ jobs:
           git checkout --orphan test
           git rm -rf . 2>/dev/null || true
 
-          android create --output=./ --name=MyApp
+          TMP_DIR=$(mktemp -d)
+          android create --output="$TMP_DIR" --name=MyApp
+          cp -r "$TMP_DIR/." .
+          rm -rf "$TMP_DIR"
 
           git add .
           git commit -m "Generate Android project from template"
