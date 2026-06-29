@@ -26,7 +26,6 @@ jobs:
 
           git switch test || git checkout --orphan test
 
-          git pull
           git rm -rf . 2>/dev/null || true
 
           TMP_DIR=$(mktemp -d)
