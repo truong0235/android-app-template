@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  #push:
+  #  branches: [main]
+  #pull_request:
+  #  branches: [main]
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Android CLI
+        run: curl -fsSL https://dl.google.com/android/cli/latest/linux_x86_64/install.sh | bash
+
+      - name: Create template and push to test branch
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git fetch origin test 2>/dev/null || true
+          git checkout -b test origin/test 2>/dev/null || git checkout --orphan test
+
+          TMP_DIR=$(mktemp -d)
+
+          echo "android create --list /n i think they only have 1 kotlint template, fuck you google /n"
+          android create --list
+          echo "/n"
+          android create --output="$TMP_DIR" --name=MyApp --minSdk=23
+
+          cp -r "$TMP_DIR/." .
+          rm -rf "$TMP_DIR"
+
+          git add .
+          if git diff --cached --quiet; then
+            echo "No changes — skipping push"
+          else
+            git commit -m "Generate Android project from template"
+            git push origin test
+          fi
